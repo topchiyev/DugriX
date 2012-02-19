@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Author</key>
+	<string>Unknown</string>
+	<key>Buffer Order</key>
+	<array>
+		<string>Main</string>
+		<string>Level1</string>
+		<string>Sky</string>
+		<string>Cloud</string>
+		<string>Background</string>
+		<string>Ground</string>
+		<string>DugriX</string>
+		<string>Controller</string>
+		<string>Button</string>
+		<string>Rect</string>
+		<string>Utils</string>
+		<string>Logger</string>
+	</array>
+	<key>Created</key>
+	<string>2012-02-11 21:10:41 +0000</string>
+	<key>Description</key>
+	<string>No description available</string>
+</dict>
+</plist>
