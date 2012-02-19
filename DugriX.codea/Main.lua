@@ -12,7 +12,7 @@ function draw()
 
     background(255, 255, 255, 255)
     level:draw()
-    controller:draw()￿
+    controller:draw()
     logger:draw()
 
     popStyle()
