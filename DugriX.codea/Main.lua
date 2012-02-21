@@ -20,5 +20,5 @@ end
 
 function touched(touch)
     controller:touched(touch)
+    logger:touched(touch)
 end
- 

@@ -103,15 +103,20 @@ function Level1:draw()
         bg:draw()
     end
     
-    self.ground:move()
     self.ground:draw()
-    
     self.dugrix:draw()
+    
+    if self.dugrix.body.y < 0 and self.over ~= true then
+        logger:log("GAME OVER")
+        self.over = true
+    end
 end
 
 function Level1:jumpButtonClick(touch)
     if touch.state == BEGAN then
         self.dugrix:jump()
+    elseif touch.state == ENDED then
+        self.dugrix:fall()
     end
 end
 

@@ -7,9 +7,12 @@ function Ground:init(x, y, speed, points)
     self.body.type = STATIC
     self.body.x = x
     self.body.y = y
+    self.sleepingAllowed = false
 end
 
 function Ground:draw()
+    self:move()
+    
     pushStyle()
     pushMatrix()
     
@@ -26,5 +29,5 @@ function Ground:draw()
 end
 
 function Ground:move()
-    self.body.position = vec2( -(level.x * self.speed), 0)
+    self.body.x = - (level.x * self.speed)
 end
