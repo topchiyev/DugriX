@@ -11,7 +11,7 @@ end
 function Level1:initBgs()
     self.bgs = {}
     local imgs = {}
-    sprite("Planet Cute:Stone Block Tall")
+    sprite("Planet Cute:Rock")
     
     -- Tree and house road
     imgs = {
@@ -23,14 +23,13 @@ function Level1:initBgs()
         { img = "Planet Cute:Stone Block", x = 400 },
         { img = "Planet Cute:Stone Block", x = 500 },
         { img = "Planet Cute:Stone Block", x = 600 },
-        
-        { img = "Planet Cute:Grass Block", x = 700 },
-        { img = "Planet Cute:Grass Block", x = 800 },
-        { img = "Planet Cute:Grass Block", x = 900 },
-        { img = "Planet Cute:Grass Block", x = 1000 },
-        { img = "Planet Cute:Grass Block", x = 1100 },
-        { img = "Planet Cute:Grass Block", x = 1200 },
     }
+    for i = 8,13 do
+        table.insert(imgs, { img = "Planet Cute:Grass Block", x = (i-1) * 100 })
+    end
+    for i = 15,24 do
+        table.insert(imgs, { img = "Planet Cute:Grass Block", x = (i-1) * 100 })
+    end
     table.insert(self.bgs, Background(270, 1, imgs))
 
     -- Tree and house level 1
@@ -42,6 +41,9 @@ function Level1:initBgs()
         { img = "Planet Cute:Wall Block Tall", x = 600 },
         { img = "Planet Cute:Tree Tall", x = 700 },
         { img = "Planet Cute:Tree Ugly", x = 1100 },
+        { img = "Planet Cute:Tree Tall", x = 1700 },
+        { img = "Planet Cute:Rock", x = 1900 },
+        { img = "Planet Cute:Tree Short", x = 2000 },
     }
     table.insert(self.bgs, Background(310, 1, imgs))
     
@@ -64,7 +66,10 @@ function Level1:initBgs()
     -- Hero road level 1
     imgs = {}
     for i = 1, 13 do
-        imgs[i] = { img = "Planet Cute:Dirt Block", x = (i-1) * 100 }
+        table.insert(imgs, { img = "Planet Cute:Dirt Block", x = (i-1) * 100 })
+    end
+    for i = 15, 24 do
+        table.insert(imgs, { img = "Planet Cute:Dirt Block", x = (i-1) * 100 })
     end
     table.insert(self.bgs, Background(65, 1, imgs))
     table.insert(self.bgs, Background(105, 1, imgs))
@@ -73,14 +78,19 @@ function Level1:initBgs()
     -- Hero road level 2 (Main)
     imgs = {}
     for i = 1, 12 do
-        imgs[i] = { img = "Planet Cute:Stone Block", x = (i-1) * 100 }
+        table.insert(imgs, { img = "Planet Cute:Stone Block", x = (i-1) * 100 })
     end
-    imgs[13] = { img = "Planet Cute:Stone Block Tall", x = 1200 }
+    table.insert(imgs, { img = "Planet Cute:Stone Block Tall", x = 1200 })
+    table.insert(imgs, { img = "Planet Cute:Stone Block Tall", x = 1400 })
+    for i = 16, 24 do
+        table.insert(imgs, { img = "Planet Cute:Stone Block", x = (i-1) * 100 })
+    end
     table.insert(self.bgs, Background(185, 1, imgs))
     
     -- Hero road level 3
     imgs = {
         { img = "Planet Cute:Ramp West", x = 1100 },
+        { img = "Planet Cute:Ramp East", x = 1500 },
     }
     table.insert(self.bgs, Background(225, 1, imgs))
 
@@ -89,9 +99,17 @@ end
 function Level1:initGround()
     local points = {
         vec2(0,-10),
-        vec2(0,185),
-        vec2(1000,185),
-        vec2(1000,-10),
+        vec2(0,150),
+        vec2(1050,150),
+        vec2(1150,185),
+        vec2(1250,185),
+        vec2(1250,-10),
+        vec2(1350,-10),
+        vec2(1350,185),
+        vec2(1450,185),
+        vec2(1550,150),
+        vec2(2350,150),
+        vec2(2350,-10),
     }
     self.ground = Ground(0, 0, 1, points)
 end
@@ -103,8 +121,12 @@ function Level1:draw()
         bg:draw()
     end
     
-    self.ground:draw()
+    self.ground:move()
     self.dugrix:draw()
+    if debugMode then
+        self.ground:draw()
+        self.dugrix:drawBody()
+    end
     
     if self.dugrix.body.y < 0 and self.over ~= true then
         logger:log("GAME OVER")

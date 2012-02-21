@@ -5,6 +5,7 @@ function setup()
     level = Level1()
     controller = Controller()
     logger = Logger()
+    debugMode = false
 end
 
 function draw()

@@ -11,13 +11,11 @@ function Ground:init(x, y, speed, points)
 end
 
 function Ground:draw()
-    self:move()
-    
     pushStyle()
     pushMatrix()
     
     translate(self.body.x, self.body.y)
-    strokeWidth(10)
+    strokeWidth(4)
     for i = 1, #self.body.points-1 do
         local a = self.body.points[i]
         local b = self.body.points[i+1]

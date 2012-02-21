@@ -4,16 +4,15 @@ function DugriX:init()
     self.img = "Planet Cute:Character Boy"
     self.jumpSound = "ZgJAKwBQQEBAQEBAAAAAAB5Mcz7AglM+QABAf0BAQEBAQEBA"
     self.jumping = false
-    self.jumpHeight = 0
-    self.maxJumpHeight = 200
     self.jumpTick = 0
+    self.landed = true
     
     self.moving = false
     self.moveDir = RIGHT
-    self.moveStep = 2
+    self.moveStep = 4
     
-    local bodySize = vec2(90,100)
-    local bodyOffset = vec2(-5,-20)
+    local bodySize = vec2(70,80)
+    local bodyOffset = vec2(-15,-30)
     
     local points = {
         vec2(0,0),
@@ -25,7 +24,7 @@ function DugriX:init()
     self.body = physics.body(POLYGON, unpack(points))
     self.body.type = DYNAMIC
     self.body.x = 200
-    self.body.y = 500--220
+    self.body.y = 500
     self.body.info = {
         size = bodySize,
         offset = bodyOffset
@@ -47,8 +46,16 @@ function DugriX:draw()
     local offset = self.body.info.offset
     sprite(self.img, self.body.x + offset.x, self.body.y + offset.y)
     
+    popMatrix()
+    popStyle()
+end
+
+function DugriX:drawBody()
+    pushStyle()
+    pushMatrix()
+    
     translate(self.body.x, self.body.y)
-    strokeWidth(10)
+    strokeWidth(4)
     for i = 1, #self.body.points do
         local a = self.body.points[i]
         local b = self.body.points[(i % #self.body.points)+1]
@@ -89,18 +96,13 @@ function DugriX:doMove()
 end
 
 function DugriX:jump()
-    if self.jumping == false then
+    if self.jumping ~= true and self:isLanded() then
         self.jumping = true
         self.originalX = self.body.x
-        self.body:applyForce(vec2(0, 5000))
+        self.jumpTick = os.clock()
+        self.body:applyForce(vec2(0, 3000))
         sound(DATA, self.jumpSound)
     end
-    
-    --if self.jumping == false then
-    --    self.body:applyForce(vec2(100, 100))
-    --    self.jumping = true
-    --    sound(DATA, self.jumpSound)
-    --end
 end
 
 function DugriX:fall()
@@ -111,33 +113,26 @@ function DugriX:doJump()
     if self.jumping then
         local curTick = os.clock()
         local shift = (curTick - self.jumpTick)
-        self.jumpTick = curTick
-        logger:log("shift"..shift)
         
-
-    
-        if self.body:testOverlap(level.ground.body) then
-            logger:log("landed")
+        if shift > 0.4 and shift < 0.6 then
+            self.body:applyForce(vec2(0, 200))
+        elseif self:isLanded() then
+            self.jumping = false
         end
     end
 end
 
-function DugriX:doJumpOld()
-    local curTick = os.clock()
-    local shift = (curTick - self.jumpTick)
-    self.jumpTick = curTick
-
-    if self.jumping then
-        if self.falling == false and self.jumpHeight < self.maxJumpHeight then
-            self.jumpHeight = self.jumpHeight + 1 * shift
-        else
-            self.falling = true
-            self.jumpHeight = self.jumpHeight - 1 * shift
-            if (self.jumpHeight < 0) then
-                self.jumping = false
-                self.falling = false
-                self.jumpHeight = 0
-            end
-        end
+function DugriX:isLanded()
+    local landed = false
+    if landed == false then
+        local pt = vec2(self.body.x + self.body.info.size.x + 1, self.body.y - 1)
+        landed = level.ground.body:testPoint(pt)
     end
+    
+    if landed == false then
+        local pt = vec2(self.body.x - 1, self.body.y - 1)
+        landed = level.ground.body:testPoint(pt)
+    end
+    
+    return landed
 end
