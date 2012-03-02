@@ -1,3 +1,4 @@
+
 function getGradientColor(width, position, color1, color2)
     r = color1.r
     g = color1.g
@@ -56,29 +57,11 @@ function centerPolyInRect(poly, rect_)
     return newPoly
 end
 
-function createCircleWithDiameter(diameter)
-    poly = {
-        vec2(diameter/6*0, diameter/6*3),
-        vec2(diameter/6*1, diameter/6*4),
-        vec2(diameter/6*2, diameter/6*5),
-        vec2(diameter/6*3, diameter/6*6),
-        vec2(diameter/6*4, diameter/6*5),
-        vec2(diameter/6*5, diameter/6*4),
-        vec2(diameter/6*6, diameter/6*3),
-        vec2(diameter/6*5, diameter/6*2),
-        vec2(diameter/6*4, diameter/6*1),
-        vec2(diameter/6*3, diameter/6*0),
-        vec2(diameter/6*2, diameter/6*1),
-        vec2(diameter/6*1, diameter/6*2)
-    }
-    return poly
-end
-
 function drawPoly(poly)
-    for i = 1, table.maxn(cir) - 1 do
-        pt = cir[i]
-        nextPt = cir[i + 1]
-        line(pt.x, pt.y, nextPt.x, nextPt.y)
+    for i = 1, #poly - 1 do
+        local a = poly[i]
+        local b = poly[i + 1]
+        line(a.x, a.y, b.x, b.y)
     end
 end
 

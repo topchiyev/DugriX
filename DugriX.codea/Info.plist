@@ -6,16 +6,23 @@
 	<string>Unknown</string>
 	<key>Buffer Order</key>
 	<array>
+		<string>Goomba</string>
+		<string>Koopa</string>
 		<string>Main</string>
 		<string>Level1</string>
+		<string>Melody</string>
+		<string>Mounts</string>
 		<string>Sky</string>
-		<string>Cloud</string>
 		<string>Background</string>
 		<string>Ground</string>
 		<string>DugriX</string>
+		<string>Block</string>
+		<string>Coin</string>
 		<string>Controller</string>
 		<string>Button</string>
 		<string>Rect</string>
+		<string>StatusBar</string>
+		<string>Audio</string>
 		<string>Utils</string>
 		<string>Logger</string>
 	</array>

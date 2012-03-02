@@ -1,15 +1,14 @@
 DugriX = class()
 
 function DugriX:init()
+    self.type = "dugrix"
     self.img = "Planet Cute:Character Boy"
-    self.jumpSound = "ZgJAKwBQQEBAQEBAAAAAAB5Mcz7AglM+QABAf0BAQEBAQEBA"
-    self.jumping = false
-    self.jumpTick = 0
-    self.landed = true
+    self.jumpNum = 0
+    self.initialPos = vec2(200, 500)
     
     self.moving = false
     self.moveDir = RIGHT
-    self.moveStep = 4
+    self.moveStep = 6
     
     local bodySize = vec2(70,80)
     local bodyOffset = vec2(-15,-30)
@@ -23,14 +22,15 @@ function DugriX:init()
     
     self.body = physics.body(POLYGON, unpack(points))
     self.body.type = DYNAMIC
-    self.body.x = 200
-    self.body.y = 500
+    self.body.x = self.initialPos.x
+    self.body.y = self.initialPos.y
     self.body.info = {
         size = bodySize,
-        offset = bodyOffset
+        offset = bodyOffset,
+        object = self,
     }
     self.body.interpolate = true
-    self.body.restitutions = 0.25
+    self.body.restitution = 0
     self.body.sleepingAllowed = false
     self.body.fixedRotation = true
 end
@@ -77,18 +77,23 @@ end
 
 function DugriX:doMove()
     if self.moving then
+        local step = self.moveStep
+        if self:isLanded() == false then
+            step = step + 1
+        end
+        
         if self.moveDir == RIGHT then
             if self.body.x < WIDTH / 3 then
-                self.body.x = self.body.x + self.moveStep
+                self.body.x = self.body.x + step
             else
-                level.x = level.x + self.moveStep
+                level.x = level.x + step
             end
         elseif self.moveDir == LEFT then
             if self.body.x > 200 then
-                self.body.x = self.body.x - self.moveStep
+                self.body.x = self.body.x - step
             else
                 if level.x > 50 then
-                    level.x = level.x - self.moveStep
+                    level.x = level.x - step
                 end
             end
         end
@@ -96,12 +101,14 @@ function DugriX:doMove()
 end
 
 function DugriX:jump()
-    if self.jumping ~= true and self:isLanded() then
-        self.jumping = true
-        self.originalX = self.body.x
-        self.jumpTick = os.clock()
-        self.body:applyForce(vec2(0, 3000))
-        sound(DATA, self.jumpSound)
+    if (self.jumpNum == 0 and self:isLanded()) or self.jumpNum == 1 then
+        self.jumpNum = self.jumpNum + 1
+        if self.jumpNum == 1 then
+            self.body:applyForce(vec2(0, 3000))
+        elseif self.jumpNum == 2 then
+            self.body:applyForce(vec2(0, 1500))
+        end
+        audio:play(audio.sounds.jump)
     end
 end
 
@@ -110,29 +117,42 @@ function DugriX:fall()
 end
 
 function DugriX:doJump()
-    if self.jumping then
-        local curTick = os.clock()
-        local shift = (curTick - self.jumpTick)
-        
-        if shift > 0.4 and shift < 0.6 then
-            self.body:applyForce(vec2(0, 200))
-        elseif self:isLanded() then
-            self.jumping = false
-        end
+    if self.jumpNum > 0 and self:isLanded() then
+        self.jumpNum = 0
     end
 end
 
 function DugriX:isLanded()
     local landed = false
-    if landed == false then
-        local pt = vec2(self.body.x + self.body.info.size.x + 1, self.body.y - 1)
-        landed = level.ground.body:testPoint(pt)
-    end
+    local pt1 = vec2(self.body.x, self.body.y - 1)
+    local pt2 = vec2(self.body.x + self.body.info.size.x, self.body.y - 1)
+    
+    landed = self.jumping == true
     
     if landed == false then
-        local pt = vec2(self.body.x - 1, self.body.y - 1)
-        landed = level.ground.body:testPoint(pt)
+        landed = (level.ground.body:testPoint(pt1) or level.ground.body:testPoint(pt2))
+    end
+    
+    for i, blk in ipairs(level.blocks) do
+        if landed == false then
+            landed = (blk.body:testPoint(pt1) or blk.body:testPoint(pt2))
+        end
+    end
+    
+    for i, coin in ipairs(level.coins) do
+        if landed == false then
+            landed = (coin.body:testPoint(pt2) or coin.body:testPoint(pt2))
+        end
     end
     
     return landed
+end
+
+function DugriX:die()
+    statusBar.lifes = statusBar.lifes - 1
+    if statusBar.lifes <= 0 then
+        return true
+    else
+        return false
+    end
 end

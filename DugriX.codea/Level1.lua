@@ -3,7 +3,10 @@ Level1 = class()
 function Level1:init()
     self.x = 0
     self.sky = Sky()
+    self.mounts = Mounts()
     self:initBgs()
+    self:initBlocks()
+    self:initCoins()
     self:initGround()
     self.dugrix = DugriX()
 end
@@ -30,7 +33,7 @@ function Level1:initBgs()
     for i = 15,24 do
         table.insert(imgs, { img = "Planet Cute:Grass Block", x = (i-1) * 100 })
     end
-    table.insert(self.bgs, Background(270, 1, imgs))
+    table.insert(self.bgs, Background(200, 1, imgs))
 
     -- Tree and house level 1
     imgs = {
@@ -45,7 +48,7 @@ function Level1:initBgs()
         { img = "Planet Cute:Rock", x = 1900 },
         { img = "Planet Cute:Tree Short", x = 2000 },
     }
-    table.insert(self.bgs, Background(310, 1, imgs))
+    table.insert(self.bgs, Background(240, 1, imgs))
     
     -- Tree and house level 2
     imgs = {
@@ -53,7 +56,7 @@ function Level1:initBgs()
         { img = "Planet Cute:Wall Block Tall", x = 500 },
         { img = "Planet Cute:Wall Block Tall", x = 600 },
     }
-    table.insert(self.bgs, Background(395, 1, imgs))
+    table.insert(self.bgs, Background(325, 1, imgs))
     
     -- Tree and house level 3
     imgs = {
@@ -61,7 +64,7 @@ function Level1:initBgs()
         { img = "Planet Cute:Roof South", x = 500 },
         { img = "Planet Cute:Roof South East", x = 600 },
     }
-    table.insert(self.bgs, Background(480, 1, imgs))
+    table.insert(self.bgs, Background(410, 1, imgs))
     
     -- Hero road level 1
     imgs = {}
@@ -71,9 +74,10 @@ function Level1:initBgs()
     for i = 15, 24 do
         table.insert(imgs, { img = "Planet Cute:Dirt Block", x = (i-1) * 100 })
     end
-    table.insert(self.bgs, Background(65, 1, imgs))
-    table.insert(self.bgs, Background(105, 1, imgs))
-    table.insert(self.bgs, Background(145, 1, imgs))
+    table.insert(self.bgs, Background(-40, 1, imgs))
+    table.insert(self.bgs, Background(0, 1, imgs))
+    table.insert(self.bgs, Background(40, 1, imgs))
+    table.insert(self.bgs, Background(80, 1, imgs))
     
     -- Hero road level 2 (Main)
     imgs = {}
@@ -85,52 +89,150 @@ function Level1:initBgs()
     for i = 16, 24 do
         table.insert(imgs, { img = "Planet Cute:Stone Block", x = (i-1) * 100 })
     end
-    table.insert(self.bgs, Background(185, 1, imgs))
+    table.insert(self.bgs, Background(120, 1, imgs))
     
     -- Hero road level 3
     imgs = {
         { img = "Planet Cute:Ramp West", x = 1100 },
         { img = "Planet Cute:Ramp East", x = 1500 },
     }
-    table.insert(self.bgs, Background(225, 1, imgs))
+    table.insert(self.bgs, Background(160, 1, imgs))
 
 end
 
 function Level1:initGround()
     local points = {
         vec2(0,-10),
-        vec2(0,150),
-        vec2(1050,150),
-        vec2(1150,185),
-        vec2(1250,185),
-        vec2(1250,-10),
-        vec2(1350,-10),
-        vec2(1350,185),
-        vec2(1450,185),
-        vec2(1550,150),
-        vec2(2350,150),
-        vec2(2350,-10),
+        vec2(0,190),
+        vec2(1100,190),
+        vec2(1200,225),
+        vec2(1300,225),
+        vec2(1300,-10),
+        vec2(1400,-10),
+        vec2(1400,225),
+        vec2(1500,225),
+        vec2(1600,190),
+        vec2(2400,190),
+        vec2(2400,-10),
     }
     self.ground = Ground(0, 0, 1, points)
 end
 
+function Level1:initBlocks()
+    self.blocks = {
+        Block(BLOCK_TYPE_GRASS, nil, 800, 350),
+        Block(BLOCK_TYPE_DIRT, nil, 900, 350),
+        Block(BLOCK_TYPE_STONE, nil, 1000, 350),
+        
+        Block(BLOCK_TYPE_STONE, nil, 1900, 160),
+        Block(BLOCK_TYPE_STONE, nil, 2300, 160),
+    }
+end
+
+function Level1:initCoins()
+    self.coins = {
+        Coin(815, 450),
+        Coin(915, 450),
+        Coin(1015, 450),
+    }
+end
+
 function Level1:draw()
     self.sky:draw()
+    self.mounts:draw()
     
     for i, bg in ipairs(self.bgs) do
         bg:draw()
     end
     
+    for i, blk in ipairs(self.blocks) do
+        blk:draw()
+    end
+    
+    for i, coin in ipairs(self.coins) do
+        coin:draw()
+    end
+    
     self.ground:move()
     self.dugrix:draw()
+    
     if debugMode then
         self.ground:draw()
         self.dugrix:drawBody()
     end
     
-    if self.dugrix.body.y < 0 and self.over ~= true then
-        logger:log("GAME OVER")
-        self.over = true
+    if self.dugrix.body.y < 0 then
+        local died = self.dugrix:die()
+        if died == true then
+            logger:log("GAME OVER")
+        else
+            self.dugrix.body.x = self.dugrix.initialPos.x
+            self.dugrix.body.y = self.dugrix.initialPos.y
+            self.dugrix:move()
+        end
+    end
+end
+
+function Level1:collide(contact)
+    local a = contact.bodyA
+    local b = contact.bodyB
+    
+    if contact.state == BEGAN then
+        if a.info.object.type == "block" or b.info.object.type == "block" then
+            self:collideBlock(contact)
+        elseif a.info.object.type == "coin" or b.info.object.type == "coin" then
+            self:collideCoin(contact)
+        end
+    end
+end
+
+function Level1:collideBlock(contact)
+    local a = contact.bodyA
+    local b = contact.bodyB
+    
+    if b.info.object.type == "block" then
+        local c = a
+        a = b
+        b = c
+    end
+    
+    if b.info.object.type == "dugrix" then
+        if a.y > b.y and b.x + b.info.size.x > a.x then
+            a.info.object:kick()
+        end
+    elseif b.info.object.type == "coin" then
+        b.info.object:take()
+    end
+end
+
+function Level1:collideCoin(contact)
+    local a = contact.bodyA
+    local b = contact.bodyB
+    
+    if b.info.object.type == "coin" then
+        local c = a
+        a = b
+        b = c
+    end
+    
+    if b.info.object.type == "dugrix" or b.info.object.type == "block" then
+        a.info.object:take()
+    end
+end
+
+function Level1:removeCoin(coin)
+    for i = 0, #self.coins do
+        if coin == self.coins[i] then
+            table.remove(self.coins, i)
+        end
+    end
+end
+
+function Level1:removeBlock(block)
+    for i = 0, #self.blocks do
+        if block == self.blocks[i] then
+            table.remove(self.blocks, i)
+        end
     end
 end
 

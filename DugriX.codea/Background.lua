@@ -9,9 +9,15 @@ end
 function Background:draw()
     self:move()
     
+    pushStyle()
+    
+    spriteMode(CORNER)
+    
     for i, img in ipairs(self.imgs) do
         sprite(img.img, img.offset + img.x , self.y)
     end
+    
+    popStyle()
 end
 
 function Background:move()

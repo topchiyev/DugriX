@@ -1,10 +1,14 @@
 Ground = class()
 
 function Ground:init(x, y, speed, points)
+    self.type = "ground"
     self.speed = speed
     
     self.body = physics.body(POLYGON, unpack(points))
     self.body.type = STATIC
+    self.body.info = {
+        object=self
+    }
     self.body.x = x
     self.body.y = y
     self.sleepingAllowed = false
