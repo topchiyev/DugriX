@@ -8,13 +8,33 @@ function Level1:init()
     self:initBlocks()
     self:initCoins()
     self:initGround()
-    self.dugrix = DugriX()
+    self:initMonsters()
+    self:initCheckPts()
+    self.dugrix = DugriX(self.checkPts[1])
+end
+
+function Level1:initCheckPts()
+    self.checkPts = {
+        vec2(200, 500),
+    }
+end
+
+function Level1:getNearestCheckPt()
+    local checkPt = vec2(0,0)
+    
+    for i, pt in ipairs(self.checkPts) do
+        if pt.x >= checkPt.x and pt.x <= self.x then
+            checkPt = pt
+        end
+    end
+    
+    return checkPt
 end
 
 function Level1:initBgs()
     self.bgs = {}
     local imgs = {}
-    sprite("Planet Cute:Rock")
+    --sprite("Planet Cute:Rock")
     
     -- Tree and house road
     imgs = {
@@ -97,7 +117,7 @@ function Level1:initBgs()
         { img = "Planet Cute:Ramp East", x = 1500 },
     }
     table.insert(self.bgs, Background(160, 1, imgs))
-
+    
 end
 
 function Level1:initGround()
@@ -137,6 +157,13 @@ function Level1:initCoins()
     }
 end
 
+function Level1:initMonsters()
+    self.monsters = {
+        Goomba(2100, 500),
+        Goomba(850, 500, nil, true),
+    }
+end
+
 function Level1:draw()
     self.sky:draw()
     self.mounts:draw()
@@ -153,6 +180,10 @@ function Level1:draw()
         coin:draw()
     end
     
+    for i, monster in ipairs(self.monsters) do
+        monster:draw()
+    end
+    
     self.ground:move()
     self.dugrix:draw()
     
@@ -161,14 +192,10 @@ function Level1:draw()
         self.dugrix:drawBody()
     end
     
-    if self.dugrix.body.y < 0 then
+    if self.dugrix.body.y < 0 and self.dugrix.dieTime == nil then
         local died = self.dugrix:die()
         if died == true then
             logger:log("GAME OVER")
-        else
-            self.dugrix.body.x = self.dugrix.initialPos.x
-            self.dugrix.body.y = self.dugrix.initialPos.y
-            self.dugrix:move()
         end
     end
 end
@@ -176,13 +203,15 @@ end
 function Level1:collide(contact)
     local a = contact.bodyA
     local b = contact.bodyB
+    local ta = a.info.object.type
+    local tb = b.info.object.type
     
-    if contact.state == BEGAN then
-        if a.info.object.type == "block" or b.info.object.type == "block" then
-            self:collideBlock(contact)
-        elseif a.info.object.type == "coin" or b.info.object.type == "coin" then
-            self:collideCoin(contact)
-        end
+    if ta == types.block or tb == types.block then
+        self:collideBlock(contact)
+    elseif ta == types.coin or tb == types.coin then
+        self:collideCoin(contact)
+    elseif ta == types.goomba or tb == types.goomba then
+        self:collideGoomba(contact)
     end
 end
 
@@ -190,18 +219,25 @@ function Level1:collideBlock(contact)
     local a = contact.bodyA
     local b = contact.bodyB
     
-    if b.info.object.type == "block" then
+    if b.info.object.type == types.block then
         local c = a
         a = b
         b = c
     end
     
-    if b.info.object.type == "dugrix" then
-        if a.y > b.y and b.x + b.info.size.x > a.x then
+    if contact.state == BEGAN then
+        if b.info.object.type == types.dugrix
+        and a.y > b.y and b.x + b.info.size.x > a.x then
             a.info.object:kick()
+        elseif b.info.object.type == types.coin then
+            b.info.object:take()
+        elseif b.info.object.type == types.goomba then
+            local pt1 = vec2(b.x - 1, b.y + (b.info.size.y / 2))
+            local pt2 = vec2(b.x + b.info.size.x + 1, pt1.y)
+            if a:testPoint(pt1) or a:testPoint(pt2) then
+                b.info.object:turn()
+            end
         end
-    elseif b.info.object.type == "coin" then
-        b.info.object:take()
     end
 end
 
@@ -209,16 +245,40 @@ function Level1:collideCoin(contact)
     local a = contact.bodyA
     local b = contact.bodyB
     
-    if b.info.object.type == "coin" then
+    if b.info.object.type == types.coin then
         local c = a
         a = b
         b = c
     end
     
-    if b.info.object.type == "dugrix" or b.info.object.type == "block" then
+    if contact.state == BEGAN
+    and (b.info.object.type == types.dugrix or b.info.object.type == types.block)
+    then
         a.info.object:take()
     end
 end
+
+function Level1:collideGoomba(contact)
+    local a = contact.bodyA
+    local b = contact.bodyB
+    
+    if b.info.object.type == types.goomba then
+        local c = a
+        a = b
+        b = c
+    end
+    
+    if contact.state == BEGAN
+    and b.info.object.type == types.dugrix
+    then
+        if b.y > a.y + a.info.size.y then
+            a.info.object:die()
+        else
+            b.info.object:die()
+        end
+    end
+end
+
 
 function Level1:removeCoin(coin)
     for i = 0, #self.coins do
@@ -232,6 +292,14 @@ function Level1:removeBlock(block)
     for i = 0, #self.blocks do
         if block == self.blocks[i] then
             table.remove(self.blocks, i)
+        end
+    end
+end
+
+function Level1:removeMonster(monster)
+    for i = 0, #self.monsters do
+        if monster == self.monsters[i] then
+            table.remove(self.monsters, i)
         end
     end
 end

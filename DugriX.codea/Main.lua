@@ -1,6 +1,16 @@
-supportedOrientations(LANDSCAPE_ANY)
+supportedOrientations(CurrentOrientation)
 displayMode(FULLSCREEN_NO_BUTTONS)
 debugMode = false
+
+types = {
+    zero = 0,
+    dugrix = 1,
+    goomba = 2,
+    koopa = 3,
+    block = 4,
+    coin = 5,
+    ground = 6,
+}
     
 function setup()
     level = Level1()

@@ -1,7 +1,7 @@
 Ground = class()
 
 function Ground:init(x, y, speed, points)
-    self.type = "ground"
+    self.type = types.ground
     self.speed = speed
     
     self.body = physics.body(POLYGON, unpack(points))
@@ -12,6 +12,17 @@ function Ground:init(x, y, speed, points)
     self.body.x = x
     self.body.y = y
     self.sleepingAllowed = false
+    
+    self.body.categories = {types.ground}
+    self.body.mask = {
+        types.zero,
+        types.dugrix,
+        types.goomba,
+        types.koopa,
+        types.block,
+        types.coin,
+        types.ground
+    }
 end
 
 function Ground:draw()

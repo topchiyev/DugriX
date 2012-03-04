@@ -6,8 +6,6 @@
 	<string>Unknown</string>
 	<key>Buffer Order</key>
 	<array>
-		<string>Goomba</string>
-		<string>Koopa</string>
 		<string>Main</string>
 		<string>Level1</string>
 		<string>Melody</string>
@@ -16,6 +14,8 @@
 		<string>Background</string>
 		<string>Ground</string>
 		<string>DugriX</string>
+		<string>Goomba</string>
+		<string>Koopa</string>
 		<string>Block</string>
 		<string>Coin</string>
 		<string>Controller</string>

@@ -1,10 +1,10 @@
 DugriX = class()
 
-function DugriX:init()
-    self.type = "dugrix"
+function DugriX:init(initPos)
+    self.type = types.dugrix
     self.img = "Planet Cute:Character Boy"
     self.jumpNum = 0
-    self.initialPos = vec2(200, 500)
+    self.initialPos = initPos or vec2(200, 500)
     
     self.moving = false
     self.moveDir = RIGHT
@@ -33,14 +33,29 @@ function DugriX:init()
     self.body.restitution = 0
     self.body.sleepingAllowed = false
     self.body.fixedRotation = true
+    
+    self.body.categories = {types.dugrix}
+    self.body.mask = {
+        types.zero,
+        types.dugrix,
+        types.goomba,
+        types.koopa,
+        types.block,
+        types.coin,
+        types.ground
+    }
 end
 
 function DugriX:draw()
+    self:doMove()
+    self:doJump()
+    
     pushStyle()
     pushMatrix()
     
-    self:doMove()
-    self:doJump()
+    if self.dieTime ~= nil then
+        tint(255, 0, 0, 255)
+    end
     
     spriteMode(CORNER)
     local offset = self.body.info.offset
@@ -48,6 +63,8 @@ function DugriX:draw()
     
     popMatrix()
     popStyle()
+    
+    self:doDie()
 end
 
 function DugriX:drawBody()
@@ -76,7 +93,7 @@ function DugriX:stop()
 end
 
 function DugriX:doMove()
-    if self.moving then
+    if self.moving and self.dieTime == nil then
         local step = self.moveStep
         if self:isLanded() == false then
             step = step + 1
@@ -148,7 +165,22 @@ function DugriX:isLanded()
     return landed
 end
 
+function DugriX:doDie()
+    if self.dieTime ~= nil and self.dieTime + 0.5 < os.clock() then
+        pt = level:getNearestCheckPt()
+        level.x = pt.x - 150
+        self.body.x = pt.x
+        self.body.y = pt.y
+        self.dieTime = nil
+        self.body.active = true
+    end
+end
+
 function DugriX:die()
+    self.dieTime = os.clock()
+    audio:play(audio.sounds.dugrixDie)
+    self.body.active = false
+    
     statusBar.lifes = statusBar.lifes - 1
     if statusBar.lifes <= 0 then
         return true
