@@ -69,20 +69,33 @@ function Goomba:draw()
     
     -- Feet
     noStroke()
-    fill(123, 50, 30, 255)
+    if self.super then
+        fill(178, 21, 25, 255)
+    else
+        fill(123, 50, 30, 255)
+    end
     ellipse(sz.x * 0.2, sz.y * 0.0, sz.x * 0.5, sz.y * 0.2)
     ellipse(sz.x * 0.5, sz.y * 0.0, sz.x * 0.8, sz.y * 0.2)
     
     -- Body
     noStroke()
-    fill(248, 255, 0, 255)
+    if self.super then
+        fill(17, 113, 195, 255)
+    else
+        fill(255, 172, 0, 255)
+    end
     ellipse(sz.x * 0.25, sz.y * 0.05, sz.x * 0.55, sz.y * 0.4)
     ellipse(sz.x * 0.45, sz.y * 0.05, sz.x * 0.75, sz.y * 0.4)
     rect(sz.x * 0.25, sz.y * 0.2, sz.x * 0.75, sz.y * 0.4)
     rect(sz.x * 0.4, sz.y * 0.05, sz.x * 0.6, sz.y * 0.5)
     
     -- Cap
-    fill(123, 50, 30, 255)
+    noStroke()
+    if self.super then
+        fill(178, 21, 25, 255)
+    else
+        fill(123, 50, 30, 255)
+    end
     ellipse(0, sz.y * 0.3, sz.x, sz.y * 0.8)
     ellipse(sz.x * 0.03, sz.y * 0.3, sz.x * 0.97, sz.y * 0.97)
     ellipse(sz.x * 0.1, sz.y * 0.3, sz.x * 0.9, sz.y)
@@ -121,6 +134,9 @@ function Goomba:draw()
     popMatrix()
     popStyle()
     
+    if self.body.y < 0 and self.dieTime == nil then
+        self:die()
+    end
     self:doDie()
 end
 

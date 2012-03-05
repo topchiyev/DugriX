@@ -159,8 +159,8 @@ end
 
 function Level1:initMonsters()
     self.monsters = {
+        Koopa(850, 500, nil, true),
         Goomba(2100, 500),
-        Goomba(850, 500, nil, true),
     }
 end
 
@@ -184,20 +184,8 @@ function Level1:draw()
         monster:draw()
     end
     
-    self.ground:move()
+    self.ground:draw()
     self.dugrix:draw()
-    
-    if debugMode then
-        self.ground:draw()
-        self.dugrix:drawBody()
-    end
-    
-    if self.dugrix.body.y < 0 and self.dugrix.dieTime == nil then
-        local died = self.dugrix:die()
-        if died == true then
-            logger:log("GAME OVER")
-        end
-    end
 end
 
 function Level1:collide(contact)
@@ -238,6 +226,8 @@ function Level1:collideBlock(contact)
                 b.info.object:turn()
             end
         end
+    elseif b.info.object.type == types.goomba and a.y > a.info.object.Y + 50 then
+        b.info.object:die()
     end
 end
 

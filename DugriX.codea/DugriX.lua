@@ -61,26 +61,22 @@ function DugriX:draw()
     local offset = self.body.info.offset
     sprite(self.img, self.body.x + offset.x, self.body.y + offset.y)
     
-    popMatrix()
-    popStyle()
-    
-    self:doDie()
-end
-
-function DugriX:drawBody()
-    pushStyle()
-    pushMatrix()
-    
-    translate(self.body.x, self.body.y)
-    strokeWidth(4)
-    for i = 1, #self.body.points do
-        local a = self.body.points[i]
-        local b = self.body.points[(i % #self.body.points)+1]
-        line(a.x, a.y, b.x, b.y)
+    if debugMode then
+        strokeWidth(4)
+        drawPoly(self.body.points)
     end
     
     popMatrix()
     popStyle()
+    
+    if self.body.y < 0 and self.dieTime == nil then
+        local died = self:die()
+        if died == true then
+            logger:log("GAME OVER")
+        end
+    end
+    
+    self:doDie()
 end
 
 function DugriX:move(dir)
