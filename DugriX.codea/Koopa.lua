@@ -5,6 +5,7 @@ Koopa = class()
 function Koopa:init(x, y, dir, super)
     self.type = types.koopa
     self.speed = 1
+    self.state = 1
     self.moveSpeed = 4
     self.levelX = 0
     self.direction = dir
@@ -61,49 +62,21 @@ function Koopa:draw()
     
     local x = self.body.x + self.body.info.offset.x
     local y = self.body.y + self.body.info.offset.y
+    local sz = self.body.info.size
+    
     translate(x, y)
     
-    local sz = self.body.info.size
-    ellipseMode(CORNERS)
-    rectMode(CORNERS)
-    
-    
-    
-    
-    -- Head
-    pts = {
-        vec2(sz.x * 0.7, sz.y * 0),
-        vec2(sz.x * 0.4, sz.y * 0),
-        vec2(sz.x * 0.2, sz.y * 0.2),
-        vec2(sz.x * 0.2, sz.y * 0.4),
-        vec2(sz.x * 0.1, sz.y * 0.45),
-        vec2(sz.x * 0.05, sz.y * 0.45),
-        vec2(sz.x * 0, sz.y * 0.5),
-        vec2(sz.x * 0, sz.y * 0.6),
-        vec2(sz.x * 0.1, sz.y * 0.7),
-        vec2(sz.x * 0.25, sz.y * 0.7),
-        vec2(sz.x * 0.4, sz.y * 0.65),
-        vec2(sz.x * 0.4, sz.y * 0.3),
-        vec2(sz.x * 0.5, sz.y * 0.2),
-        vec2(sz.x * 0.7, sz.y * 0.2),
-        vec2(sz.x * 0.7, sz.y * 0),
-    }
-    m = mesh()
-    m.vertices = triangulate(pts)
-    c = color(151, 91, 26, 255)
-    m:setColors(c)
-    pushMatrix()
-    translate(-10,30)
-    scale(0.9)
-    m:draw()
-    popMatrix()
-
-    -- Eye
-    
+    if self.state == 1 then
+        if self.direction == LEFT then
+            self:drawLeft()
+        elseif self.direction == RIGHT then
+            self:drawRight()
+        end
+    end
     
     -- Panzer
-    pushMatrix()
-    scale(1.1)
+    ellipseMode(CORNERS)
+    rectMode(CORNERS)
     noStroke()
     fill(225, 218, 119, 255)
     ellipse(sz.x * 0.05, sz.y * 0.05, sz.x * 0.9, sz.y * 0.7)
@@ -118,7 +91,10 @@ function Koopa:draw()
     line(sz.x * 0.45, sz.y * 0.65, sz.x * 0.77, sz.y * 0.3)
     line(sz.x * 0.3, sz.y * 0.6, sz.x * 0.67, sz.y * 0.22)
     line(sz.x * 0.2, sz.y * 0.5, sz.x * 0.52, sz.y * 0.17)
-    popMatrix()
+    
+    if self.state > 1 then
+        self:drawHoles()
+    end
     
     if debugMode then
         noFill()
@@ -134,6 +110,68 @@ function Koopa:draw()
         self:die()
     end
     self:doDie()
+end
+
+function Koopa:drawRight()
+    local sz = self.body.info.size
+    ellipseMode(CORNERS)
+    rectMode(CORNERS)
+    
+    -- Head
+    noStroke()
+    fill(128, 69, 30, 255)
+    ellipse(sz.x * 0.0, sz.y * 0.7, sz.x * 0.4, sz.y * 1.1)
+    rect(sz.x * 0.2, sz.y * 0.2, sz.x * 0.4, sz.y * 0.9)
+    fill(0, 0, 0, 255)
+    rect(sz.x * 0.03, sz.y * 0.8, sz.x * 0.1, sz.y * 0.85)
+    
+    -- Eye
+    noStroke()
+    fill(0, 0, 0, 255)
+    ellipse(sz.x * 0.15, sz.y * 0.85, sz.x * 0.3, sz.y * 1.0)
+    
+    -- Legs
+    noStroke()
+    fill(128, 69, 30, 255)
+    ellipse(sz.x * 0.0, sz.y * 0.0, sz.x * 0.3, sz.y * 0.3)
+    ellipse(sz.x * 0.7, sz.y * 0.0, sz.x * 1.0, sz.y * 0.3)
+end
+
+function Koopa:drawLeft()
+    local sz = self.body.info.size
+    ellipseMode(CORNERS)
+    rectMode(CORNERS)
+    
+    -- Head
+    noStroke()
+    fill(128, 69, 30, 255)
+    ellipse(sz.x * 0.6, sz.y * 0.7, sz.x * 1.0, sz.y * 1.1)
+    rect(sz.x * 0.6, sz.y * 0.2, sz.x * 0.8, sz.y * 0.9)
+    fill(0, 0, 0, 255)
+    rect(sz.x * 0.9, sz.y * 0.8, sz.x * 0.97, sz.y * 0.85)
+    
+    -- Eye
+    noStroke()
+    fill(0, 0, 0, 255)
+    ellipse(sz.x * 0.7, sz.y * 0.85, sz.x * 0.85, sz.y * 1.0)
+    
+    -- Legs
+    noStroke()
+    fill(128, 69, 30, 255)
+    ellipse(sz.x * 0.0, sz.y * 0.0, sz.x * 0.3, sz.y * 0.3)
+    ellipse(sz.x * 0.7, sz.y * 0.0, sz.x * 1.0, sz.y * 0.3)
+end
+
+function Koopa:drawHoles()
+    local sz = self.body.info.size
+    ellipseMode(CORNERS)
+    rectMode(CORNERS)
+    
+    noStroke()
+    fill(0, 0, 0, 255)
+
+    ellipse(sz.x * 0.15, sz.y * 0.1, sz.x * 0.35, sz.y * 0.3)
+    ellipse(sz.x * 0.6, sz.y * 0.1, sz.x * 0.8, sz.y * 0.3)
 end
 
 function Koopa:move()
@@ -167,10 +205,20 @@ function Koopa:move()
             end
         end
         
-        if self.direction == LEFT then
-            self.body.x = self.body.x + self.moveSpeed
-        else
-            self.body.x = self.body.x - self.moveSpeed
+        if self.state == 1 then
+            if self.direction == LEFT then
+                self.body.x = self.body.x + self.moveSpeed
+            else
+                self.body.x = self.body.x - self.moveSpeed
+            end
+        elseif self.state == 2 then
+            -- don't move
+        elseif self.state == 3 then
+            if self.direction == LEFT then
+                self.body.x = self.body.x + (self.moveSpeed * 3)
+            else
+                self.body.x = self.body.x - (self.moveSpeed * 3)
+            end
         end
     end
 end

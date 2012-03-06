@@ -200,6 +200,8 @@ function Level1:collide(contact)
         self:collideCoin(contact)
     elseif ta == types.goomba or tb == types.goomba then
         self:collideGoomba(contact)
+    elseif ta == types.koopa or tb == types.koopa then
+        self:collideKoopa(contact)
     end
 end
 
@@ -219,14 +221,16 @@ function Level1:collideBlock(contact)
             a.info.object:kick()
         elseif b.info.object.type == types.coin then
             b.info.object:take()
-        elseif b.info.object.type == types.goomba then
+        elseif b.info.object.type == types.goomba
+        or b.info.object.type == types.koopa then
             local pt1 = vec2(b.x - 1, b.y + (b.info.size.y / 2))
             local pt2 = vec2(b.x + b.info.size.x + 1, pt1.y)
             if a:testPoint(pt1) or a:testPoint(pt2) then
                 b.info.object:turn()
             end
         end
-    elseif b.info.object.type == types.goomba and a.y > a.info.object.Y + 50 then
+    elseif (b.info.object.type == types.goomba or b.info.object.type == types.koopa)
+    and a.y > a.info.object.Y + 50 then
         b.info.object:die()
     end
 end
@@ -269,6 +273,28 @@ function Level1:collideGoomba(contact)
     end
 end
 
+function Level1:collideKoopa(contact)
+    local a = contact.bodyA
+    local b = contact.bodyB
+    
+    if b.info.object.type == types.koopa then
+        local c = a
+        a = b
+        b = c
+    end
+    
+    if contact.state == BEGAN and b.info.object.type == types.dugrix then
+        if a.info.object.state == 1 and b.y > a.y + a.info.size.y then
+            a.info.object.state = 2
+        elseif a.info.object.state == 2 then
+            a.info.object.state = 3
+        elseif a.info.object.state == 3 and b.y > a.y + a.info.size.y then
+            a.info.object.state = 2
+        else
+            b.info.object:die()
+        end
+    end
+end
 
 function Level1:removeCoin(coin)
     for i = 0, #self.coins do
